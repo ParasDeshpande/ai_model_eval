@@ -11,13 +11,12 @@
 var SHEET_NAME = "Responses";
 
 // ── GET handler ────────────────────────────────────────────────────────────
-// Supports two modes:
-//   ?action=getAll              → plain JSON  (same-origin / server-side use)
-//   ?action=getAll&callback=fn  → JSONP       (cross-origin browser fetch)
+// Uses HtmlService instead of ContentService so Apps Script serves the
+// response with Access-Control-Allow-Origin: * headers automatically.
+// This allows fetch() in the browser to read the response body (CORS fix).
 function doGet(e) {
-  var params   = (e && e.parameter) ? e.parameter : {};
-  var action   = params.action   || "";
-  var callback = params.callback || "";   // JSONP callback name
+  var params = (e && e.parameter) ? e.parameter : {};
+  var action = params.action || "";
 
   if (action === "getAll") {
     try {
@@ -38,27 +37,21 @@ function doGet(e) {
         payload = { status: "ok", count: rows.length, rows: rows };
       }
 
-      // JSONP: wrap in callback function call so browsers can read it cross-origin
-      if (callback) {
-        return ContentService
-          .createTextOutput(callback + "(" + JSON.stringify(payload) + ");")
-          .setMimeType(ContentService.MimeType.JAVASCRIPT);
-      }
-      return jsonResponse(payload);
+      return HtmlService
+        .createHtmlOutput(JSON.stringify(payload))
+        .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 
     } catch (err) {
-      var errPayload = { status: "error", message: err.toString() };
-      if (callback) {
-        return ContentService
-          .createTextOutput(callback + "(" + JSON.stringify(errPayload) + ");")
-          .setMimeType(ContentService.MimeType.JAVASCRIPT);
-      }
-      return jsonResponse(errPayload);
+      return HtmlService
+        .createHtmlOutput(JSON.stringify({ status: "error", message: err.toString() }))
+        .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
     }
   }
 
   // Default GET — health check
-  return jsonResponse({ status: "ok", message: "Endpoint is live." });
+  return HtmlService
+    .createHtmlOutput(JSON.stringify({ status: "ok", message: "Endpoint is live." }))
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
 // ── POST handler ───────────────────────────────────────────────────────────

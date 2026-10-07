@@ -669,7 +669,7 @@
   // ════════════════════════════════════════════════════════
   // CONFIG — set both values after deploying Apps Script
   // ════════════════════════════════════════════════════════
-  const APPS_SCRIPT_URL  = "https://script.google.com/macros/s/AKfycbw4C5SVj8KweClBiV2f0QUZZOk1gTHG80YU6FuZJt-8weNwLZY88Dcbowg_jAsX8mdQ/exechttps://script.google.com/macros/s/AKfycbw4C5SVj8KweClBiV2f0QUZZOk1gTHG80YU6FuZJt-8weNwLZY88Dcbowg_jAsX8mdQ/exechttps://script.google.com/macros/s/AKfycbxtbbEPDWTINL3IqCZaPtIsRgy4SNx0fBTd06oyJz7fJ3KHtV9TcdHeJv8TW-bkJgYu/exec";
+  const APPS_SCRIPT_URL  = "https://script.google.com/macros/s/AKfycbwQ0MtR4H7GG3P1-s-afzioaaQn0gTtq3NtFjd6016Ejhie3y3ecRlfuu84X_JpIGY1/exec";
   const ANALYTICS_PASS   = "diwali2024";   // ← change this to your own password
 
   // ════════════════════════════════════════════════════════
@@ -700,11 +700,8 @@
   // ════════════════════════════════════════════════════════
   // ANALYTICS DATA FETCH & RENDER
   // ════════════════════════════════════════════════════════
-  // loadAnalytics uses JSONP to avoid CORS issues with Apps Script.
-  // Apps Script does not send Access-Control-Allow-Origin headers,
-  // so a regular fetch() is blocked. JSONP injects a <script> tag
-  // which bypasses CORS entirely and Apps Script wraps the response
-  // in the callback function name we provide.
+  // loadAnalytics — fetch() works here because Code.gs uses HtmlService
+  // which Apps Script serves with Access-Control-Allow-Origin: * headers.
   function loadAnalytics() {
     if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
       document.getElementById('an-loading').innerHTML =
@@ -717,51 +714,47 @@
 
     document.getElementById('an-loading').style.display = 'block';
     document.getElementById('an-content').style.display  = 'none';
+    document.getElementById('an-loading').innerHTML =
+      '<span style="font-size:2rem;display:block;margin-bottom:.7rem">⏳</span>Loading data from Google Sheets…';
 
-    // Create a unique callback name and expose it globally
-    const cbName = '_gsCallback_' + Date.now();
+    // Remove any leftover JSONP script tags from previous attempts
+    const old = document.getElementById('_jsonp_script');
+    if (old) old.remove();
 
-    // Set a timeout in case the script never loads
-    const timer = setTimeout(() => {
-      cleanup();
-      document.getElementById('an-loading').innerHTML =
-        '<span style="font-size:2rem;display:block;margin-bottom:.7rem">❌</span>' +
-        'Request timed out. Check that your Apps Script URL is correct and ' +
-        'deployed with <strong>Who has access: Anyone</strong>.';
-    }, 15000);
+    fetch(APPS_SCRIPT_URL + '?action=getAll', { redirect: 'follow' })
+      .then(function(res) { return res.text(); })
+      .then(function(text) {
+        // HtmlService wraps content in an HTML page — extract JSON from it
+        // If the response is already raw JSON, JSON.parse works directly.
+        // If wrapped in HTML, pull out the JSON from the body text.
+        var json;
+        try {
+          json = JSON.parse(text);
+        } catch(e) {
+          // HtmlService wraps in <html><head>...</head><body>JSON</body></html>
+          var match = text.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+          if (match) {
+            json = JSON.parse(match[1].trim());
+          } else {
+            throw new Error('Could not parse response: ' + text.substring(0, 200));
+          }
+        }
 
-    function cleanup() {
-      clearTimeout(timer);
-      delete window[cbName];
-      const old = document.getElementById('_jsonp_script');
-      if (old) old.remove();
-    }
+        if (json.status !== 'ok' || !json.rows) {
+          throw new Error(json.message || 'Bad response from Apps Script');
+        }
 
-    // The global callback Apps Script will call
-    window[cbName] = function(json) {
-      cleanup();
-      if (json.status !== 'ok' || !json.rows) {
+        document.getElementById('an-loading').style.display = 'none';
+        document.getElementById('an-content').style.display = 'block';
+        renderAnalytics(json.rows);
+      })
+      .catch(function(err) {
         document.getElementById('an-loading').innerHTML =
           '<span style="font-size:2rem;display:block;margin-bottom:.7rem">❌</span>' +
-          'Error from Apps Script: ' + (json.message || 'Unknown error');
-        return;
-      }
-      document.getElementById('an-loading').style.display = 'none';
-      document.getElementById('an-content').style.display = 'block';
-      renderAnalytics(json.rows);
-    };
-
-    // Inject the script tag — this is what triggers the request
-    const script = document.createElement('script');
-    script.id  = '_jsonp_script';
-    script.src = APPS_SCRIPT_URL + '?action=getAll&callback=' + cbName;
-    script.onerror = function() {
-      cleanup();
-      document.getElementById('an-loading').innerHTML =
-        '<span style="font-size:2rem;display:block;margin-bottom:.7rem">❌</span>' +
-        'Could not load the Apps Script. Check the URL and deployment settings.';
-    };
-    document.head.appendChild(script);
+          '<strong>Could not load data.</strong><br><br>' +
+          '<span style="font-size:.85rem">Error: ' + err.message + '</span><br><br>' +
+          '<span style="font-size:.82rem;color:#999">Make sure you re-deployed the updated Code.gs as a <strong>New version</strong> in Apps Script.</span>';
+      });
   }
 
   function renderAnalytics(rows) {
