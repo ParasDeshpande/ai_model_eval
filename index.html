@@ -112,7 +112,7 @@
     .model-card .img-wrap img:hover { transform:scale(1.03); }
 
     /* ── Section title ── */
-    .section-title { font-size:.92rem; font-weight:700; color:var(--text); margin-bottom:1rem; padding-bottom:.5rem; border-bottom:2px solid var(--brand-light); display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; }
+    .section-title { font-size:.92rem; font-weight:700; color:var(--text); margin-bottom:1rem; padding-bottom:.5rem; border-bottom:2px solid var(--brand-light); display:flex; align-items:center; gap:.5rem; }
     .section-title .pill { background:var(--brand); color:#fff; border-radius:50px; padding:.1rem .6rem; font-size:.72rem; font-weight:700; }
 
     /* ── Winner buttons ── */
@@ -121,7 +121,7 @@
     .winner-btn:hover { border-color:var(--brand); color:var(--brand); }
     .winner-btn.selected { background:var(--brand); border-color:var(--brand); color:#fff; transform:scale(1.05); }
 
-    /* ── Stars — desktop table layout ── */
+    /* ── Stars ── */
     .ratings-table { width:100%; border-collapse:collapse; margin-bottom:1.5rem; }
     .ratings-table th { font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); padding:.5rem .8rem; text-align:center; background:var(--surface-2); }
     .ratings-table th:first-child { text-align:left; min-width:200px; }
@@ -133,18 +133,6 @@
     .star { font-size:1.4rem; cursor:pointer; color:#ddd; transition:color .15s,transform .15s; line-height:1; user-select:none; }
     .star:hover,.star.hovered,.star.active { color:#f9c74f; }
     .star:hover { transform:scale(1.2); }
-
-    /* ── Stars — mobile stacked layout ── */
-    /* On small screens the 4-column table is replaced with stacked criterion cards */
-    .mobile-rating-block { display:none; }
-    .mob-criterion { background:var(--surface-2); border:1px solid var(--border); border-radius:10px; padding:.9rem 1rem; margin-bottom:.8rem; }
-    .mob-criterion-title { font-size:.85rem; font-weight:700; margin-bottom:.2rem; }
-    .mob-criterion-sub { font-size:.75rem; color:var(--muted); margin-bottom:.75rem; line-height:1.4; }
-    .mob-model-row { display:flex; align-items:center; justify-content:space-between; padding:.35rem 0; border-bottom:1px dashed var(--border); }
-    .mob-model-row:last-child { border-bottom:none; }
-    .mob-model-label { font-size:.78rem; font-weight:700; color:var(--muted); min-width:60px; }
-    .mob-stars { display:inline-flex; gap:.2rem; }
-    .mob-stars .star { font-size:1.7rem; }
 
     /* ── Defects ── */
     .defect-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:.6rem; margin-bottom:1.5rem; }
@@ -171,92 +159,6 @@
     .submit-status.sending { display:block; background:rgba(255,255,255,.1); color:#ffd8a8; }
     .submit-status.ok      { display:block; background:#27ae60; color:#fff; }
     .submit-status.fail    { display:block; background:#e74c3c; color:#fff; }
-
-    /* ════════════════════════════════════════
-       RESPONSIVE — all breakpoints
-    ════════════════════════════════════════ */
-
-    /* ── Tablet: ≤ 768px ── */
-    @media (max-width: 768px) {
-      .site-header { padding:1.8rem 1rem 1.5rem; }
-      .site-header::before, .site-header::after { display:none; }
-      .site-header h1 { font-size:1.25rem; }
-      .site-header p { font-size:.85rem; }
-
-      .tab-btn { padding:.75rem 1.2rem; font-size:.82rem; }
-
-      .progress-wrap { padding:.75rem 1rem; gap:.6rem; }
-      .progress-label { display:none; }
-
-      .container { padding:1rem .75rem 3rem; gap:1.5rem; }
-
-      .card-header { padding:1rem 1.2rem; flex-wrap:wrap; gap:.5rem; }
-      .card-header h2 { font-size:.95rem; }
-      .card-header .step-badge { display:none; }
-      .card-body { padding:1.2rem; }
-
-      .form-row { grid-template-columns:1fr; }
-
-      .model-grid { grid-template-columns:1fr; gap:.8rem; }
-
-      /* hide desktop ratings table, show mobile blocks */
-      .ratings-table { display:none; }
-      .mobile-rating-block { display:block; }
-
-      .defect-grid { grid-template-columns:1fr; }
-
-      .winner-btn { flex:1; min-width:calc(50% - .35rem); text-align:center; padding:.6rem .5rem; font-size:.82rem; }
-
-      .btn-submit { width:100%; padding:.9rem 1rem; }
-
-      .pass-gate { margin:2rem 1rem; padding:1.8rem 1.2rem; }
-
-      .an-grid { grid-template-columns:1fr; }
-      .analytics-wrap { padding:1rem .75rem 3rem; }
-      .an-hero { padding:1.5rem 1rem; }
-      .an-hero h2 { font-size:1.1rem; }
-
-      .modal { border-radius:var(--radius) var(--radius) 0 0; max-height:92vh; }
-      .modal-header { padding:1.2rem 1.2rem; border-radius:var(--radius) var(--radius) 0 0; }
-      .modal-header h2 { font-size:1.1rem; }
-      .modal-body { padding:1.2rem; }
-      .overlay { padding:0; align-items:flex-end; }
-    }
-
-    /* ── Mobile: ≤ 480px ── */
-    @media (max-width: 480px) {
-      .site-header h1 { font-size:1.1rem; }
-      .header-badge { font-size:.7rem; padding:.25rem .7rem; }
-
-      .tab-btn { padding:.7rem .9rem; font-size:.78rem; gap:.3rem; }
-
-      .card-header { padding:.85rem 1rem; }
-      .card-header .icon { width:32px; height:32px; font-size:1rem; }
-      .card-header h2 { font-size:.88rem; }
-      .card-body { padding:1rem; }
-
-      .prompt-box { font-size:.78rem; padding:.8rem 1rem; }
-
-      .section-title { font-size:.82rem; }
-
-      .winner-btn { font-size:.8rem; padding:.55rem .5rem; }
-
-      .mob-stars .star { font-size:1.9rem; }
-
-      .defect-item { font-size:.82rem; padding:.5rem; }
-
-      .btn-submit { font-size:.9rem; letter-spacing:.2px; }
-
-      .form-group input, .form-group textarea { font-size:1rem; } /* prevent iOS zoom on focus */
-
-      .consent-box label { font-size:.82rem; }
-
-      .an-hero { padding:1.2rem .8rem; }
-      .an-card { padding:1rem; }
-      .an-card h3 { font-size:.75rem; }
-
-      .modal-header h2 { font-size:1rem; }
-    }
 
     /* ── Modal ── */
     .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:1000; align-items:center; justify-content:center; padding:1rem; }
@@ -472,80 +374,25 @@
           <tbody>
             <tr>
               <td><strong>Cultural Authenticity &amp; Traditional Aesthetics</strong><div class="q-text">How authentic is the presentation of the brass thali, clay diyas, and marigold petals for an Indian home context?</div></td>
-              <td><div class="stars" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
-              <td><div class="stars" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
-              <td><div class="stars" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+              <td><div class="stars" id="sA-cultural-A" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+              <td><div class="stars" id="sA-cultural-B" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+              <td><div class="stars" id="sA-cultural-C" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
             </tr>
             <tr>
               <td><strong>Product Realism &amp; Food Texture</strong><div class="q-text">Does the food look appetising and real — specifically the silver foil (vark) on Kaju Katli and glistening texture on Motichoor Laddoos?</div></td>
-              <td><div class="stars" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
-              <td><div class="stars" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
-              <td><div class="stars" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+              <td><div class="stars" id="sA-realism-A" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+              <td><div class="stars" id="sA-realism-B" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+              <td><div class="stars" id="sA-realism-C" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
             </tr>
             <tr>
               <td><strong>Prompt Adherence</strong><div class="q-text">Did the model include all key requested elements (dark wooden table, two glowing diyas, marigold petals, both specific sweets)?</div></td>
-              <td><div class="stars" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
-              <td><div class="stars" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
-              <td><div class="stars" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+              <td><div class="stars" id="sA-prompt-A" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+              <td><div class="stars" id="sA-prompt-B" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+              <td><div class="stars" id="sA-prompt-C" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
             </tr>
           </tbody>
         </table>
         <span class="field-error" id="err-starsA">Please rate all criteria for Set A.</span>
-
-        <!-- Mobile stacked rating blocks (shown on ≤768px, hidden on desktop) -->
-        <div class="mobile-rating-block" id="mobA">
-          <!-- Cultural -->
-          <div class="mob-criterion">
-            <div class="mob-criterion-title">Cultural Authenticity &amp; Traditional Aesthetics</div>
-            <div class="mob-criterion-sub">How authentic is the presentation of the brass thali, clay diyas, and marigold petals?</div>
-            <div class="mob-model-row">
-              <span class="mob-model-label">Model A</span>
-              <div class="mob-stars" id="sA-cultural-A" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div>
-            </div>
-            <div class="mob-model-row">
-              <span class="mob-model-label">Model B</span>
-              <div class="mob-stars" id="sA-cultural-B" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div>
-            </div>
-            <div class="mob-model-row">
-              <span class="mob-model-label">Model C</span>
-              <div class="mob-stars" id="sA-cultural-C" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div>
-            </div>
-          </div>
-          <!-- Realism -->
-          <div class="mob-criterion">
-            <div class="mob-criterion-title">Product Realism &amp; Food Texture</div>
-            <div class="mob-criterion-sub">Does the food look appetising and real — vark on Kaju Katli, glistening Motichoor Laddoos?</div>
-            <div class="mob-model-row">
-              <span class="mob-model-label">Model A</span>
-              <div class="mob-stars" id="sA-realism-A" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div>
-            </div>
-            <div class="mob-model-row">
-              <span class="mob-model-label">Model B</span>
-              <div class="mob-stars" id="sA-realism-B" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div>
-            </div>
-            <div class="mob-model-row">
-              <span class="mob-model-label">Model C</span>
-              <div class="mob-stars" id="sA-realism-C" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div>
-            </div>
-          </div>
-          <!-- Prompt -->
-          <div class="mob-criterion">
-            <div class="mob-criterion-title">Prompt Adherence</div>
-            <div class="mob-criterion-sub">Did the model include all key elements — dark table, two diyas, marigolds, both sweets?</div>
-            <div class="mob-model-row">
-              <span class="mob-model-label">Model A</span>
-              <div class="mob-stars" id="sA-prompt-A" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div>
-            </div>
-            <div class="mob-model-row">
-              <span class="mob-model-label">Model B</span>
-              <div class="mob-stars" id="sA-prompt-B" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div>
-            </div>
-            <div class="mob-model-row">
-              <span class="mob-model-label">Model C</span>
-              <div class="mob-stars" id="sA-prompt-C" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div>
-            </div>
-          </div>
-        </div><!-- /mobA -->
         <div class="divider"></div>
 
         <div class="section-title"><span>🔍</span> Defect Tagging — Set A <span class="pill">Q3</span></div>
@@ -612,80 +459,25 @@
           <tbody>
             <tr>
               <td><strong>Cultural Authenticity &amp; Festive Vibe</strong><div class="q-text">Do the Banarasi silk saree (zari border), festive Kurta Pyjama, rangoli, and balcony backdrop accurately represent a real Indian Diwali night?</div></td>
-              <td><div class="stars" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
-              <td><div class="stars" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
-              <td><div class="stars" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+              <td><div class="stars" id="sB-cultural-A" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+              <td><div class="stars" id="sB-cultural-B" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+              <td><div class="stars" id="sB-cultural-C" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
             </tr>
             <tr>
               <td><strong>Anatomical Realism &amp; Expressions</strong><div class="q-text">Do the couple's faces, hands, skin tones, and expressions look warm and natural rather than distorted or fake?</div></td>
-              <td><div class="stars" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
-              <td><div class="stars" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
-              <td><div class="stars" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+              <td><div class="stars" id="sB-anat-A" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+              <td><div class="stars" id="sB-anat-B" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+              <td><div class="stars" id="sB-anat-C" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
             </tr>
             <tr>
               <td><strong>Prompt Adherence</strong><div class="q-text">Did the model include all requested details (night time, decorated balcony, fairy lights, rangoli, diyas, specified clothing)?</div></td>
-              <td><div class="stars" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
-              <td><div class="stars" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
-              <td><div class="stars" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+              <td><div class="stars" id="sB-prompt-A" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+              <td><div class="stars" id="sB-prompt-B" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+              <td><div class="stars" id="sB-prompt-C" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
             </tr>
           </tbody>
         </table>
         <span class="field-error" id="err-starsB">Please rate all criteria for Set B.</span>
-
-        <!-- Mobile stacked rating blocks for Set B -->
-        <div class="mobile-rating-block" id="mobB">
-          <!-- Cultural -->
-          <div class="mob-criterion">
-            <div class="mob-criterion-title">Cultural Authenticity &amp; Festive Vibe</div>
-            <div class="mob-criterion-sub">Do the saree, Kurta Pyjama, rangoli, and balcony backdrop represent a real Diwali night?</div>
-            <div class="mob-model-row">
-              <span class="mob-model-label">Model A</span>
-              <div class="mob-stars" id="sB-cultural-A" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div>
-            </div>
-            <div class="mob-model-row">
-              <span class="mob-model-label">Model B</span>
-              <div class="mob-stars" id="sB-cultural-B" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div>
-            </div>
-            <div class="mob-model-row">
-              <span class="mob-model-label">Model C</span>
-              <div class="mob-stars" id="sB-cultural-C" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div>
-            </div>
-          </div>
-          <!-- Anatomical -->
-          <div class="mob-criterion">
-            <div class="mob-criterion-title">Anatomical Realism &amp; Expressions</div>
-            <div class="mob-criterion-sub">Do the couple's faces, hands, skin tones, and expressions look warm and natural?</div>
-            <div class="mob-model-row">
-              <span class="mob-model-label">Model A</span>
-              <div class="mob-stars" id="sB-anat-A" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div>
-            </div>
-            <div class="mob-model-row">
-              <span class="mob-model-label">Model B</span>
-              <div class="mob-stars" id="sB-anat-B" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div>
-            </div>
-            <div class="mob-model-row">
-              <span class="mob-model-label">Model C</span>
-              <div class="mob-stars" id="sB-anat-C" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div>
-            </div>
-          </div>
-          <!-- Prompt -->
-          <div class="mob-criterion">
-            <div class="mob-criterion-title">Prompt Adherence</div>
-            <div class="mob-criterion-sub">Did the model include all details — night time, balcony, fairy lights, rangoli, diyas, outfits?</div>
-            <div class="mob-model-row">
-              <span class="mob-model-label">Model A</span>
-              <div class="mob-stars" id="sB-prompt-A" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div>
-            </div>
-            <div class="mob-model-row">
-              <span class="mob-model-label">Model B</span>
-              <div class="mob-stars" id="sB-prompt-B" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div>
-            </div>
-            <div class="mob-model-row">
-              <span class="mob-model-label">Model C</span>
-              <div class="mob-stars" id="sB-prompt-C" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div>
-            </div>
-          </div>
-        </div><!-- /mobB -->
         <div class="divider"></div>
 
         <div class="section-title"><span>🔍</span> Defect Tagging — Set B <span class="pill">Q6</span></div>
