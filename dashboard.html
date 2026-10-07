@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Image Quality Rating Dashboard</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand:      #e67e22;
+      --brand-dark: #ca6f1e;
+      --brand-light:#fef9f0;
+      --accent:     #8e44ad;
+      --green:      #27ae60;
+      --red:        #e74c3c;
+      --surface:    #ffffff;
+      --surface-2:  #f8f5f0;
+      --border:     #e8ddd0;
+      --text:       #2c2c2c;
+      --muted:      #7f8c8d;
+      --shadow-sm:  0 2px 8px rgba(0,0,0,.08);
+      --shadow-md:  0 6px 24px rgba(0,0,0,.12);
+      --radius:     12px;
+      --radius-lg:  20px;
+    }
+
+    body { font-family:'Segoe UI',system-ui,sans-serif; background:var(--surface-2); color:var(--text); line-height:1.6; }
+
+    /* ── Header ── */
+    .site-header {
+      background: linear-gradient(135deg,#1a0a00 0%,#3d1a00 50%,#1a0a00 100%);
+      color:#fff; padding:2.5rem 2rem 2rem; text-align:center; position:relative; overflow:hidden;
+    }
+    .site-header::before { content:'🪔'; position:absolute; top:10px; left:30px; font-size:2rem; opacity:.5; }
+    .site-header::after  { content:'🪔'; position:absolute; top:10px; right:30px; font-size:2rem; opacity:.5; }
+    .site-header h1 { font-size:clamp(1.4rem,3vw,2.2rem); font-weight:700; color:#f9c74f; }
+    .site-header p  { margin-top:.5rem; color:#ffd8a8; font-size:.95rem; max-width:640px; margin-inline:auto; }
+    .header-badge {
+      display:inline-block; background:rgba(255,255,255,.12); border:1px solid rgba(255,215,100,.3);
+      border-radius:50px; padding:.3rem 1rem; font-size:.8rem; color:#f9c74f;
+      margin-top:.8rem; letter-spacing:.5px; text-transform:uppercase;
+    }
+
+    /* ── Tab nav ── */
+    .tab-nav {
+      background:var(--surface); border-bottom:2px solid var(--border);
+      display:flex; position:sticky; top:0; z-index:100; box-shadow:var(--shadow-sm);
+    }
+    .tab-btn {
+      padding:.85rem 2rem; font-size:.9rem; font-weight:600;
+      border:none; background:none; cursor:pointer; color:var(--muted);
+      border-bottom:3px solid transparent; margin-bottom:-2px;
+      transition:color .2s,border-color .2s; display:flex; align-items:center; gap:.45rem;
+    }
+    .tab-btn:hover { color:var(--brand); }
+    .tab-btn.active { color:var(--brand); border-bottom-color:var(--brand); }
+
+    /* ── Pages ── */
+    .page { display:none; }
+    .page.active { display:block; }
+
+    /* ── Progress bar ── */
+    .progress-wrap {
+      background:var(--surface); border-bottom:1px solid var(--border);
+      padding:1rem 2rem; display:flex; align-items:center; gap:1rem; box-shadow:var(--shadow-sm);
+    }
+    .progress-label { font-size:.85rem; font-weight:600; white-space:nowrap; color:var(--muted); }
+    .progress-bar-bg { flex:1; height:8px; background:#eedcc8; border-radius:99px; overflow:hidden; }
+    .progress-bar-fill { height:100%; width:0%; background:linear-gradient(90deg,var(--brand),var(--accent)); border-radius:99px; transition:width .5s ease; }
+    .progress-pct { font-size:.85rem; font-weight:700; color:var(--brand); min-width:36px; }
+
+    /* ── Layout ── */
+    .container { max-width:1100px; margin:0 auto; padding:2rem 1.5rem 4rem; display:flex; flex-direction:column; gap:2.5rem; }
+
+    /* ── Card ── */
+    .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); overflow:hidden; }
+    .card-header { padding:1.2rem 1.8rem; display:flex; align-items:center; gap:.75rem; border-bottom:1px solid var(--border); }
+    .card-header .icon { width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; }
+    .icon-info { background:#eaf4fb; } .icon-seta { background:#fef9e7; } .icon-setb { background:#f4ecf7; } .icon-qual { background:#eafaf1; }
+    .card-header h2 { font-size:1.1rem; font-weight:700; }
+    .card-header .step-badge { margin-left:auto; background:var(--surface-2); border:1px solid var(--border); border-radius:50px; padding:.2rem .7rem; font-size:.75rem; font-weight:600; color:var(--muted); }
+    .card-body { padding:1.8rem; }
+
+    /* ── Form ── */
+    .form-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem 1.5rem; margin-bottom:1rem; }
+    .form-group { display:flex; flex-direction:column; gap:.35rem; }
+    .form-group label { font-size:.82rem; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; }
+    .form-group input,.form-group textarea,.form-group select { padding:.6rem .9rem; border:1.5px solid var(--border); border-radius:8px; font-size:.95rem; font-family:inherit; background:var(--surface); color:var(--text); outline:none; transition:border-color .2s; }
+    .form-group input:focus,.form-group textarea:focus { border-color:var(--brand); }
+    .form-group textarea { resize:vertical; min-height:80px; }
+    .form-group input.error { border-color:var(--red); }
+    .field-error { font-size:.78rem; color:var(--red); display:none; }
+    .field-error.show { display:block; }
+    .consent-box { background:var(--brand-light); border:1.5px solid #f0d9b5; border-radius:10px; padding:1rem 1.2rem; display:flex; gap:.8rem; align-items:flex-start; margin-top:.5rem; }
+    .consent-box input[type="checkbox"] { width:18px; height:18px; margin-top:2px; cursor:pointer; accent-color:var(--brand); flex-shrink:0; }
+    .consent-box label { font-size:.88rem; color:#555; cursor:pointer; line-height:1.5; }
+
+    /* ── Prompt box ── */
+    .prompt-box { background:#1e1e2e; color:#e0d7ff; border-radius:10px; padding:1rem 1.3rem; font-size:.83rem; line-height:1.6; margin-bottom:1.5rem; }
+    .prompt-box .prompt-label { font-size:.7rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#a78bfa; margin-bottom:.4rem; }
+
+    /* ── Image grid ── */
+    .model-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.2rem; margin-bottom:2rem; }
+    @media(max-width:700px){ .model-grid { grid-template-columns:1fr; } }
+    .model-card { border:2px solid var(--border); border-radius:var(--radius); overflow:hidden; transition:border-color .2s,box-shadow .2s; background:var(--surface); }
+    .model-card:hover { border-color:var(--brand); box-shadow:var(--shadow-md); }
+    .model-card .model-label { background:var(--surface-2); padding:.5rem .9rem; font-size:.8rem; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+    .model-card .model-label .blind-tag { background:#2c3e50; color:#fff; border-radius:50px; padding:.15rem .6rem; font-size:.7rem; }
+    .model-card .img-wrap { width:100%; aspect-ratio:4/3; background:#111; overflow:hidden; }
+    .model-card .img-wrap img { width:100%; height:100%; object-fit:cover; transition:transform .3s; cursor:zoom-in; }
+    .model-card .img-wrap img:hover { transform:scale(1.03); }
+
+    /* ── Section title ── */
+    .section-title { font-size:.92rem; font-weight:700; color:var(--text); margin-bottom:1rem; padding-bottom:.5rem; border-bottom:2px solid var(--brand-light); display:flex; align-items:center; gap:.5rem; }
+    .section-title .pill { background:var(--brand); color:#fff; border-radius:50px; padding:.1rem .6rem; font-size:.72rem; font-weight:700; }
+
+    /* ── Winner buttons ── */
+    .winner-row { display:flex; flex-wrap:wrap; gap:.7rem; margin-bottom:1.5rem; }
+    .winner-btn { padding:.55rem 1.2rem; border:2px solid var(--border); border-radius:50px; font-size:.88rem; font-weight:600; cursor:pointer; background:var(--surface); color:var(--text); transition:all .2s; }
+    .winner-btn:hover { border-color:var(--brand); color:var(--brand); }
+    .winner-btn.selected { background:var(--brand); border-color:var(--brand); color:#fff; transform:scale(1.05); }
+
+    /* ── Stars ── */
+    .ratings-table { width:100%; border-collapse:collapse; margin-bottom:1.5rem; }
+    .ratings-table th { font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); padding:.5rem .8rem; text-align:center; background:var(--surface-2); }
+    .ratings-table th:first-child { text-align:left; min-width:200px; }
+    .ratings-table td { padding:.65rem .8rem; border-bottom:1px solid var(--border); vertical-align:middle; text-align:center; }
+    .ratings-table td:first-child { font-size:.88rem; line-height:1.4; text-align:left; }
+    .ratings-table td:first-child .q-text { color:var(--muted); font-size:.78rem; margin-top:.2rem; }
+    .ratings-table tr:last-child td { border-bottom:none; }
+    .stars { display:inline-flex; gap:.15rem; }
+    .star { font-size:1.4rem; cursor:pointer; color:#ddd; transition:color .15s,transform .15s; line-height:1; user-select:none; }
+    .star:hover,.star.hovered,.star.active { color:#f9c74f; }
+    .star:hover { transform:scale(1.2); }
+
+    /* ── Defects ── */
+    .defect-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:.6rem; margin-bottom:1.5rem; }
+    .defect-item { display:flex; align-items:flex-start; gap:.5rem; font-size:.85rem; padding:.5rem .7rem; border:1.5px solid var(--border); border-radius:8px; cursor:pointer; transition:background .2s,border-color .2s; }
+    .defect-item:hover { background:var(--brand-light); border-color:var(--brand); }
+    .defect-item input[type="checkbox"] { accent-color:var(--red); margin-top:2px; flex-shrink:0; }
+    .defect-item.checked { background:#fdf0f0; border-color:var(--red); }
+
+    /* ── Qualitative ── */
+    .qual-question { margin-bottom:1.5rem; }
+    .qual-question .ql { font-size:.92rem; font-weight:600; margin-bottom:.6rem; }
+    .qual-question .ql span { color:var(--muted); font-weight:400; font-size:.85rem; }
+
+    /* ── Submit zone ── */
+    .submit-zone { background:linear-gradient(135deg,#1a0a00,#3d1a00); border-radius:var(--radius-lg); padding:2rem; text-align:center; color:#fff; }
+    .submit-zone p { color:#ffd8a8; margin-bottom:1.2rem; font-size:.9rem; }
+    .btn-submit { background:linear-gradient(135deg,#f9c74f,var(--brand)); color:#1a0a00; border:none; padding:.85rem 3rem; font-size:1rem; font-weight:800; border-radius:50px; cursor:pointer; letter-spacing:.5px; text-transform:uppercase; transition:transform .2s,box-shadow .2s; box-shadow:0 4px 16px rgba(249,199,79,.4); }
+    .btn-submit:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(249,199,79,.5); }
+    .btn-submit:active { transform:translateY(0); }
+    .btn-submit:disabled { opacity:.6; cursor:not-allowed; transform:none; }
+    .spinner { display:inline-block; width:18px; height:18px; border:3px solid rgba(26,10,0,.2); border-top-color:#1a0a00; border-radius:50%; animation:spin .7s linear infinite; vertical-align:middle; margin-right:.5rem; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .submit-status { display:none; margin-top:1rem; border-radius:10px; padding:.8rem 1.2rem; font-size:.9rem; font-weight:600; text-align:center; }
+    .submit-status.sending { display:block; background:rgba(255,255,255,.1); color:#ffd8a8; }
+    .submit-status.ok      { display:block; background:#27ae60; color:#fff; }
+    .submit-status.fail    { display:block; background:#e74c3c; color:#fff; }
+
+    /* ── Modal ── */
+    .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:1000; align-items:center; justify-content:center; padding:1rem; }
+    .overlay.open { display:flex; }
+    .modal { background:var(--surface); border-radius:var(--radius-lg); max-width:760px; width:100%; max-height:88vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.4); }
+    .modal-header { background:linear-gradient(135deg,#1a0a00,#3d1a00); color:#f9c74f; padding:1.5rem 2rem; display:flex; justify-content:space-between; align-items:center; border-radius:var(--radius-lg) var(--radius-lg) 0 0; }
+    .modal-header h2 { font-size:1.3rem; }
+    .modal-close { background:none; border:none; color:#f9c74f; font-size:1.5rem; cursor:pointer; }
+    .modal-body { padding:2rem; }
+    .result-section { margin-bottom:1.5rem; }
+    .result-section h3 { font-size:.88rem; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); margin-bottom:.8rem; padding-bottom:.4rem; border-bottom:1px solid var(--border); }
+    .result-row { display:flex; justify-content:space-between; align-items:center; padding:.45rem 0; border-bottom:1px dashed var(--border); font-size:.88rem; }
+    .result-row:last-child { border-bottom:none; }
+    .result-row .label { color:var(--muted); }
+    .result-row .value { font-weight:700; }
+    .stars-display { color:#f9c74f; }
+    .score-bar-label { font-size:.82rem; display:flex; justify-content:space-between; margin-bottom:.3rem; }
+    .score-bar-bg { height:10px; background:#eee; border-radius:99px; overflow:hidden; }
+    .score-bar-fill { height:100%; border-radius:99px; background:linear-gradient(90deg,var(--brand),#f9c74f); }
+    .winner-highlight { background:linear-gradient(135deg,#fef9e7,#fff8e1); border:2px solid #f9c74f; border-radius:10px; padding:1rem 1.2rem; text-align:center; margin-top:1rem; }
+    .winner-highlight .trophy { font-size:2rem; }
+    .winner-highlight .wname { font-size:1.2rem; font-weight:800; color:var(--brand); margin:.3rem 0; }
+
+    /* ── Analytics page ── */
+    .analytics-wrap { max-width:1100px; margin:0 auto; padding:2rem 1.5rem 4rem; }
+
+    /* password gate */
+    .pass-gate { max-width:400px; margin:4rem auto; background:var(--surface); border-radius:var(--radius-lg); padding:2.5rem; box-shadow:var(--shadow-md); text-align:center; }
+    .pass-gate h2 { font-size:1.2rem; margin-bottom:.5rem; }
+    .pass-gate p { font-size:.88rem; color:var(--muted); margin-bottom:1.5rem; }
+    .pass-gate input { width:100%; padding:.65rem 1rem; border:1.5px solid var(--border); border-radius:8px; font-size:1rem; outline:none; margin-bottom:.8rem; text-align:center; letter-spacing:.2rem; }
+    .pass-gate input:focus { border-color:var(--brand); }
+    .pass-gate .btn-unlock { width:100%; padding:.7rem; background:var(--brand); color:#fff; border:none; border-radius:8px; font-size:.95rem; font-weight:700; cursor:pointer; transition:background .2s; }
+    .pass-gate .btn-unlock:hover { background:var(--brand-dark); }
+    .pass-gate .err { color:var(--red); font-size:.82rem; margin-top:.4rem; display:none; }
+    .pass-gate .err.show { display:block; }
+
+    /* analytics hero */
+    .an-hero { background:linear-gradient(135deg,#1a0a00,#3d1a00); color:#f9c74f; padding:2rem; border-radius:var(--radius-lg); text-align:center; margin-bottom:1.5rem; }
+    .an-hero h2 { font-size:1.4rem; margin-bottom:.4rem; }
+    .an-hero p { color:#ffd8a8; font-size:.9rem; }
+    .an-hero .an-meta { display:inline-flex; gap:1.5rem; margin-top:1rem; flex-wrap:wrap; justify-content:center; }
+    .an-hero .an-meta span { background:rgba(255,255,255,.1); border:1px solid rgba(255,215,100,.3); border-radius:50px; padding:.3rem 1rem; font-size:.82rem; color:#ffd8a8; }
+
+    .an-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:1.5rem; margin-bottom:1.5rem; }
+    .an-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:1.4rem; box-shadow:var(--shadow-sm); }
+    .an-card h3 { font-size:.8rem; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); margin-bottom:1rem; display:flex; align-items:center; gap:.4rem; }
+
+    /* podium */
+    .podium { display:flex; gap:.7rem; align-items:flex-end; justify-content:center; }
+    .podium-item { flex:1; border-radius:10px 10px 0 0; display:flex; flex-direction:column; align-items:center; padding:.6rem .4rem; transition:transform .2s; }
+    .podium-item:hover { transform:translateY(-3px); }
+    .p1 { background:linear-gradient(180deg,#fff8e1,#fef3cd); border:2px solid #f9c74f; }
+    .p2 { background:linear-gradient(180deg,#f4f4f4,#e8e8e8); border:2px solid #bbb; }
+    .p3 { background:linear-gradient(180deg,#fff0e6,#ffe4cc); border:2px solid #e67e22; }
+    .podium-icon { font-size:1.6rem; }
+    .podium-name { font-size:.68rem; font-weight:700; text-align:center; margin:.3rem 0 .1rem; color:#333; }
+    .podium-score { font-size:1.2rem; font-weight:800; color:var(--brand); }
+    .podium-sub { font-size:.65rem; color:var(--muted); }
+
+    /* bar rows */
+    .bar-row { margin-bottom:.9rem; }
+    .bar-row-top { display:flex; justify-content:space-between; font-size:.82rem; margin-bottom:.3rem; }
+    .bar-row-top .mn { font-weight:600; }
+    .bar-row-top .sv { color:var(--brand); font-weight:700; }
+    .bar-bg { height:10px; background:#eee; border-radius:99px; overflow:hidden; }
+    .bar-fill { height:100%; border-radius:99px; transition:width .6s ease; }
+    .bf-A { background:linear-gradient(90deg,#3498db,#5dade2); }
+    .bf-B { background:linear-gradient(90deg,#27ae60,#58d68d); }
+    .bf-C { background:linear-gradient(90deg,#8e44ad,#bb8fce); }
+
+    /* tally */
+    .tally-row { display:flex; align-items:center; gap:.7rem; margin-bottom:.7rem; }
+    .tally-label { font-weight:700; font-size:.8rem; min-width:68px; }
+    .tally-bar-bg { flex:1; height:22px; background:#eee; border-radius:6px; overflow:hidden; }
+    .tally-fill { height:100%; border-radius:6px; display:flex; align-items:center; justify-content:flex-end; padding-right:.4rem; font-size:.75rem; font-weight:700; color:#fff; min-width:26px; transition:width .6s ease; }
+    .tf-A { background:#3498db; } .tf-B { background:#27ae60; } .tf-C { background:#8e44ad; } .tf-Tie { background:#95a5a6; }
+    .tally-count { font-size:.8rem; font-weight:700; color:var(--muted); min-width:28px; text-align:right; }
+
+    /* defect table */
+    .def-table { width:100%; border-collapse:collapse; font-size:.8rem; }
+    .def-table th { background:var(--surface-2); padding:.4rem .6rem; text-align:left; font-weight:700; font-size:.72rem; text-transform:uppercase; letter-spacing:.4px; color:var(--muted); }
+    .def-table td { padding:.4rem .6rem; border-bottom:1px solid var(--border); vertical-align:top; }
+    .def-table tr:last-child td { border-bottom:none; }
+    .dc { display:inline-block; border:1px solid var(--red); color:var(--red); background:#fdf0f0; border-radius:4px; padding:.05rem .4rem; font-weight:700; font-size:.78rem; }
+    .dc.z { border-color:var(--green); color:var(--green); background:#f0faf0; }
+
+    /* feedback */
+    .fb-list { list-style:none; }
+    .fb-list li { padding:.7rem .9rem; border-radius:8px; background:var(--surface-2); margin-bottom:.5rem; font-size:.86rem; line-height:1.5; border-left:3px solid var(--brand); }
+    .fb-list li .fb-meta { font-size:.74rem; color:var(--muted); margin-bottom:.3rem; font-weight:600; }
+
+    /* refresh btn */
+    .btn-refresh { padding:.55rem 1.2rem; border-radius:8px; border:1.5px solid var(--border); background:var(--surface); font-size:.85rem; font-weight:600; cursor:pointer; color:var(--text); transition:all .2s; display:inline-flex; align-items:center; gap:.4rem; margin-bottom:1.5rem; }
+    .btn-refresh:hover { border-color:var(--brand); color:var(--brand); background:var(--brand-light); }
+
+    .no-data { text-align:center; padding:3rem 1rem; color:var(--muted); }
+    .no-data .nd-icon { font-size:2.5rem; display:block; margin-bottom:.7rem; }
+
+    /* ── Lightbox ── */
+    .lightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,.9); z-index:2000; align-items:center; justify-content:center; }
+    .lightbox.open { display:flex; }
+    .lightbox img { max-width:90vw; max-height:90vh; border-radius:8px; }
+    .lightbox-close { position:absolute; top:1rem; right:1.5rem; color:#fff; font-size:2rem; cursor:pointer; background:none; border:none; }
+
+    /* ── Toast ── */
+    .toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%) translateY(80px); background:#2c2c2c; color:#fff; padding:.7rem 1.5rem; border-radius:50px; font-size:.88rem; font-weight:600; transition:transform .4s ease; z-index:3000; pointer-events:none; }
+    .toast.show { transform:translateX(-50%) translateY(0); }
+    .toast.success { background:var(--green); }
+    .toast.error   { background:var(--red); }
+
+    /* ── Misc ── */
+    .divider { height:1px; background:var(--border); margin:1.5rem 0; }
+    .text-muted { color:var(--muted); font-size:.88rem; }
+    .required { color:var(--red); }
+    ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:var(--surface-2); } ::-webkit-scrollbar-thumb { background:#ccc; border-radius:3px; }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header class="site-header">
+  <h1>🪔 Diwali Ad — AI Image Quality Evaluation</h1>
+  <p>Blind comparison of AI Models</p>
+  <div class="header-badge">Assignment</div>
+</header>
+
+<!-- ── TAB NAV ── -->
+<nav class="tab-nav">
+  <button class="tab-btn active" id="tab-form"      onclick="switchTab('form')">📋 Evaluation Form</button>
+  <button class="tab-btn"        id="tab-analytics" onclick="switchTab('analytics')">📊 Analytics</button>
+</nav>
+
+<!-- ════════════════════════════════════════
+     PAGE 1 — EVALUATION FORM
+════════════════════════════════════════ -->
+<div class="page active" id="page-form">
+
+  <!-- progress bar -->
+  <div class="progress-wrap">
+    <span class="progress-label">Form Progress</span>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
+    <span class="progress-pct" id="progressPct">0%</span>
+  </div>
+
+  <div class="container">
+
+    <!-- Part 1 -->
+    <div class="card" id="part1">
+      <div class="card-header">
+        <div class="icon icon-info">👤</div>
+        <div><h2>Part 1 — Participant Information &amp; Consent</h2><div class="text-muted" style="font-size:.82rem;margin-top:.2rem">All fields are required</div></div>
+        <span class="step-badge">Step 1 / 4</span>
+      </div>
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Full Name <span class="required">*</span></label>
+            <input type="text" id="fullName" placeholder="e.g. Priya Sharma" />
+            <span class="field-error" id="err-fullName">Please enter your full name.</span>
+          </div>
+          <div class="form-group">
+            <label>Email Address <span class="required">*</span></label>
+            <input type="email" id="email" placeholder="priya@example.com" />
+            <span class="field-error" id="err-email">Please enter a valid email.</span>
+          </div>
+          <div class="form-group">
+            <label>Age <span class="required">*</span> <span class="text-muted">(Must be 18+)</span></label>
+            <input type="number" id="age" placeholder="e.g. 28" min="18" max="100" />
+            <span class="field-error" id="err-age">You must be 18 or older.</span>
+          </div>
+        </div>
+        <div class="consent-box">
+          <input type="checkbox" id="consent" />
+          <label for="consent">I confirm that I am <strong>18 years or older</strong>. I voluntarily participated in this evaluation. I consent to my name, email, and responses/ratings being included in this assignment submission for <strong>hiring evaluation purposes</strong>.</label>
+        </div>
+        <span class="field-error" id="err-consent" style="margin-top:.5rem">You must agree to the consent statement.</span>
+      </div>
+    </div>
+
+    <!-- Set A -->
+    <div class="card" id="part2a">
+      <div class="card-header">
+        <div class="icon icon-seta">🍬</div>
+        <div><h2>Part 2 — Set A &nbsp;·&nbsp; Food &amp; Decor (Sweets &amp; Brass Thali)</h2><div class="text-muted" style="font-size:.82rem;margin-top:.2rem">Rate each model blind</div></div>
+        <span class="step-badge">Step 2 / 4</span>
+      </div>
+      <div class="card-body">
+        <div class="prompt-box">
+          <div class="prompt-label">📝 Original Prompt Used</div>
+          A high-end commercial e-commerce photograph of traditional Indian Diwali sweets: silver-vark Kaju Katli and golden Motichoor Laddoos in an ornate brass thali, with two glowing clay diyas and fresh marigold petals on a dark wooden table. Warm festive studio lighting, realistic food texture, sharp focus, premium photography.
+        </div>
+        <div class="model-grid">
+          <div class="model-card"><div class="model-label">Set A · Image 1 <span class="blind-tag">Model A</span></div><div class="img-wrap"><img src="GPT1-1.png" alt="Set A Model A" onclick="openLightbox(this.src)" /></div></div>
+          <div class="model-card"><div class="model-label">Set A · Image 2 <span class="blind-tag">Model B</span></div><div class="img-wrap"><img src="gemini-2.5-1.jpg" alt="Set A Model B" onclick="openLightbox(this.src)" /></div></div>
+          <div class="model-card"><div class="model-label">Set A · Image 3 <span class="blind-tag">Model C</span></div><div class="img-wrap"><img src="gemini-3.1-flash-1.jpg" alt="Set A Model C" onclick="openLightbox(this.src)" /></div></div>
+        </div>
+
+        <div class="section-title"><span>🏆</span> Overall Winner Choice <span class="pill">Q1</span></div>
+        <p class="text-muted" style="margin-bottom:.8rem"><em>"Which image would you pick for a commercial Indian Diwali sweets ad campaign?"</em></p>
+        <div class="winner-row" id="winnerA">
+          <button class="winner-btn" data-set="A" data-val="A" onclick="selectWinner(this)">⭐ Model A</button>
+          <button class="winner-btn" data-set="A" data-val="B" onclick="selectWinner(this)">⭐ Model B</button>
+          <button class="winner-btn" data-set="A" data-val="C" onclick="selectWinner(this)">⭐ Model C</button>
+          <button class="winner-btn" data-set="A" data-val="Tie" onclick="selectWinner(this)">🤝 Tie / None</button>
+        </div>
+        <span class="field-error" id="err-winnerA">Please select a winner for Set A.</span>
+        <div class="divider"></div>
+
+        <div class="section-title"><span>⭐</span> Multi-Criteria Rating (1–5 Stars) <span class="pill">Q2</span></div>
+        <table class="ratings-table">
+          <thead><tr><th>Criterion</th><th>Model A</th><th>Model B</th><th>Model C</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Cultural Authenticity &amp; Traditional Aesthetics</strong><div class="q-text">How authentic is the presentation of the brass thali, clay diyas, and marigold petals for an Indian home context?</div></td>
+              <td><div class="stars" id="sA-cultural-A" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+              <td><div class="stars" id="sA-cultural-B" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+              <td><div class="stars" id="sA-cultural-C" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+            </tr>
+            <tr>
+              <td><strong>Product Realism &amp; Food Texture</strong><div class="q-text">Does the food look appetising and real — specifically the silver foil (vark) on Kaju Katli and glistening texture on Motichoor Laddoos?</div></td>
+              <td><div class="stars" id="sA-realism-A" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+              <td><div class="stars" id="sA-realism-B" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+              <td><div class="stars" id="sA-realism-C" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+            </tr>
+            <tr>
+              <td><strong>Prompt Adherence</strong><div class="q-text">Did the model include all key requested elements (dark wooden table, two glowing diyas, marigold petals, both specific sweets)?</div></td>
+              <td><div class="stars" id="sA-prompt-A" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+              <td><div class="stars" id="sA-prompt-B" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+              <td><div class="stars" id="sA-prompt-C" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+            </tr>
+          </tbody>
+        </table>
+        <span class="field-error" id="err-starsA">Please rate all criteria for Set A.</span>
+        <div class="divider"></div>
+
+        <div class="section-title"><span>🔍</span> Defect Tagging — Set A <span class="pill">Q3</span></div>
+        <p class="text-muted" style="margin-bottom:1rem"><em>Select all visible flaws (check all that apply):</em></p>
+        <div style="font-weight:600;font-size:.85rem;margin-bottom:.5rem">Model A Defects:</div>
+        <div class="defect-grid">
+          <label class="defect-item"><input type="checkbox" name="dA-A" value="vark-grey"/> Silver foil (vark) looks like a grey smudge / unrealistic</label>
+          <label class="defect-item"><input type="checkbox" name="dA-A" value="plastic"/> Sweets texture looks plasticky or artificial</label>
+          <label class="defect-item"><input type="checkbox" name="dA-A" value="thali-distort"/> Brass thali shape or finish looks distorted</label>
+          <label class="defect-item"><input type="checkbox" name="dA-A" value="lighting"/> Unnatural lighting / over-saturated glow</label>
+          <label class="defect-item"><input type="checkbox" name="dA-A" value="missing"/> Missing items requested in the prompt</label>
+        </div>
+        <div style="font-weight:600;font-size:.85rem;margin-bottom:.5rem;margin-top:1rem">Model B Defects:</div>
+        <div class="defect-grid">
+          <label class="defect-item"><input type="checkbox" name="dA-B" value="vark-grey"/> Silver foil (vark) looks like a grey smudge / unrealistic</label>
+          <label class="defect-item"><input type="checkbox" name="dA-B" value="plastic"/> Sweets texture looks plasticky or artificial</label>
+          <label class="defect-item"><input type="checkbox" name="dA-B" value="thali-distort"/> Brass thali shape or finish looks distorted</label>
+          <label class="defect-item"><input type="checkbox" name="dA-B" value="lighting"/> Unnatural lighting / over-saturated glow</label>
+          <label class="defect-item"><input type="checkbox" name="dA-B" value="missing"/> Missing items requested in the prompt</label>
+        </div>
+        <div style="font-weight:600;font-size:.85rem;margin-bottom:.5rem;margin-top:1rem">Model C Defects:</div>
+        <div class="defect-grid">
+          <label class="defect-item"><input type="checkbox" name="dA-C" value="vark-grey"/> Silver foil (vark) looks like a grey smudge / unrealistic</label>
+          <label class="defect-item"><input type="checkbox" name="dA-C" value="plastic"/> Sweets texture looks plasticky or artificial</label>
+          <label class="defect-item"><input type="checkbox" name="dA-C" value="thali-distort"/> Brass thali shape or finish looks distorted</label>
+          <label class="defect-item"><input type="checkbox" name="dA-C" value="lighting"/> Unnatural lighting / over-saturated glow</label>
+          <label class="defect-item"><input type="checkbox" name="dA-C" value="missing"/> Missing items requested in the prompt</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Set B -->
+    <div class="card" id="part2b">
+      <div class="card-header">
+        <div class="icon icon-setb">👫</div>
+        <div><h2>Part 2 — Set B &nbsp;·&nbsp; Couple &amp; Decor (Balcony Celebration)</h2></div>
+        <span class="step-badge">Step 3 / 4</span>
+      </div>
+      <div class="card-body">
+        <div class="prompt-box">
+          <div class="prompt-label">📝 Original Prompt Used</div>
+          An Indian couple celebrating Diwali on a decorated home balcony at night. The woman wears a Banarasi silk saree with gold zari borders, and the man wears an embroidered festive Kurta Pyjama. Colorful rangoli, glowing diyas and fairy lights in the background, warm natural expressions, realistic photography.
+        </div>
+        <div class="model-grid">
+          <div class="model-card"><div class="model-label">Set B · Image 1 <span class="blind-tag">Model A</span></div><div class="img-wrap"><img src="GPT1-2.png" alt="Set B Model A" onclick="openLightbox(this.src)" /></div></div>
+          <div class="model-card"><div class="model-label">Set B · Image 2 <span class="blind-tag">Model B</span></div><div class="img-wrap"><img src="gemini-2.5-2.jpg" alt="Set B Model B" onclick="openLightbox(this.src)" /></div></div>
+          <div class="model-card"><div class="model-label">Set B · Image 3 <span class="blind-tag">Model C</span></div><div class="img-wrap"><img src="gemini-3.1-flash-2.jpg" alt="Set B Model C" onclick="openLightbox(this.src)" /></div></div>
+        </div>
+
+        <div class="section-title"><span>🏆</span> Overall Winner Choice <span class="pill">Q4</span></div>
+        <p class="text-muted" style="margin-bottom:.8rem"><em>"Which image would you pick for an Indian festive lifestyle / fashion brand ad campaign?"</em></p>
+        <div class="winner-row" id="winnerB">
+          <button class="winner-btn" data-set="B" data-val="A" onclick="selectWinner(this)">⭐ Model A</button>
+          <button class="winner-btn" data-set="B" data-val="B" onclick="selectWinner(this)">⭐ Model B</button>
+          <button class="winner-btn" data-set="B" data-val="C" onclick="selectWinner(this)">⭐ Model C</button>
+          <button class="winner-btn" data-set="B" data-val="Tie" onclick="selectWinner(this)">🤝 Tie / None</button>
+        </div>
+        <span class="field-error" id="err-winnerB">Please select a winner for Set B.</span>
+        <div class="divider"></div>
+
+        <div class="section-title"><span>⭐</span> Multi-Criteria Rating (1–5 Stars) <span class="pill">Q5</span></div>
+        <table class="ratings-table">
+          <thead><tr><th>Criterion</th><th>Model A</th><th>Model B</th><th>Model C</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Cultural Authenticity &amp; Festive Vibe</strong><div class="q-text">Do the Banarasi silk saree (zari border), festive Kurta Pyjama, rangoli, and balcony backdrop accurately represent a real Indian Diwali night?</div></td>
+              <td><div class="stars" id="sB-cultural-A" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+              <td><div class="stars" id="sB-cultural-B" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+              <td><div class="stars" id="sB-cultural-C" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+            </tr>
+            <tr>
+              <td><strong>Anatomical Realism &amp; Expressions</strong><div class="q-text">Do the couple's faces, hands, skin tones, and expressions look warm and natural rather than distorted or fake?</div></td>
+              <td><div class="stars" id="sB-anat-A" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+              <td><div class="stars" id="sB-anat-B" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+              <td><div class="stars" id="sB-anat-C" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+            </tr>
+            <tr>
+              <td><strong>Prompt Adherence</strong><div class="q-text">Did the model include all requested details (night time, decorated balcony, fairy lights, rangoli, diyas, specified clothing)?</div></td>
+              <td><div class="stars" id="sB-prompt-A" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+              <td><div class="stars" id="sB-prompt-B" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+              <td><div class="stars" id="sB-prompt-C" data-val="0" onmouseout="clearHover(this)"><span class="star" onclick="setStar(this,1)" onmouseover="hoverStar(this,1)">★</span><span class="star" onclick="setStar(this,2)" onmouseover="hoverStar(this,2)">★</span><span class="star" onclick="setStar(this,3)" onmouseover="hoverStar(this,3)">★</span><span class="star" onclick="setStar(this,4)" onmouseover="hoverStar(this,4)">★</span><span class="star" onclick="setStar(this,5)" onmouseover="hoverStar(this,5)">★</span></div></td>
+            </tr>
+          </tbody>
+        </table>
+        <span class="field-error" id="err-starsB">Please rate all criteria for Set B.</span>
+        <div class="divider"></div>
+
+        <div class="section-title"><span>🔍</span> Defect Tagging — Set B <span class="pill">Q6</span></div>
+        <p class="text-muted" style="margin-bottom:1rem"><em>Select all visible flaws (check all that apply):</em></p>
+        <div style="font-weight:600;font-size:.85rem;margin-bottom:.5rem">Model A Defects:</div>
+        <div class="defect-grid">
+          <label class="defect-item"><input type="checkbox" name="dB-A" value="hands"/> Distorted hands, fingers, or facial features</label>
+          <label class="defect-item"><input type="checkbox" name="dB-A" value="saree"/> Saree drape or zari border pattern looks wrong/flat</label>
+          <label class="defect-item"><input type="checkbox" name="dB-A" value="exaggerated"/> Overly exaggerated or orientalized outfits/decor</label>
+          <label class="defect-item"><input type="checkbox" name="dB-A" value="face-light"/> Unnatural lighting on faces from fairy lights/diyas</label>
+          <label class="defect-item"><input type="checkbox" name="dB-A" value="bg-blur"/> Background/balcony elements blurred or unrealistic</label>
+        </div>
+        <div style="font-weight:600;font-size:.85rem;margin-bottom:.5rem;margin-top:1rem">Model B Defects:</div>
+        <div class="defect-grid">
+          <label class="defect-item"><input type="checkbox" name="dB-B" value="hands"/> Distorted hands, fingers, or facial features</label>
+          <label class="defect-item"><input type="checkbox" name="dB-B" value="saree"/> Saree drape or zari border pattern looks wrong/flat</label>
+          <label class="defect-item"><input type="checkbox" name="dB-B" value="exaggerated"/> Overly exaggerated or orientalized outfits/decor</label>
+          <label class="defect-item"><input type="checkbox" name="dB-B" value="face-light"/> Unnatural lighting on faces from fairy lights/diyas</label>
+          <label class="defect-item"><input type="checkbox" name="dB-B" value="bg-blur"/> Background/balcony elements blurred or unrealistic</label>
+        </div>
+        <div style="font-weight:600;font-size:.85rem;margin-bottom:.5rem;margin-top:1rem">Model C Defects:</div>
+        <div class="defect-grid">
+          <label class="defect-item"><input type="checkbox" name="dB-C" value="hands"/> Distorted hands, fingers, or facial features</label>
+          <label class="defect-item"><input type="checkbox" name="dB-C" value="saree"/> Saree drape or zari border pattern looks wrong/flat</label>
+          <label class="defect-item"><input type="checkbox" name="dB-C" value="exaggerated"/> Overly exaggerated or orientalized outfits/decor</label>
+          <label class="defect-item"><input type="checkbox" name="dB-C" value="face-light"/> Unnatural lighting on faces from fairy lights/diyas</label>
+          <label class="defect-item"><input type="checkbox" name="dB-C" value="bg-blur"/> Background/balcony elements blurred or unrealistic</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Part 3 -->
+    <div class="card" id="part3">
+      <div class="card-header">
+        <div class="icon icon-qual">💬</div>
+        <div><h2>Part 3 — Qualitative Feedback</h2><div class="text-muted" style="font-size:.82rem;margin-top:.2rem">Overall impressions across both sets</div></div>
+        <span class="step-badge">Step 4 / 4</span>
+      </div>
+      <div class="card-body">
+        <div class="qual-question">
+          <div class="ql">Q7. Overall Preference <span class="required">*</span><br/><span>"Which overall model generated the most commercially usable image for Indian festive ads?"</span></div>
+          <div class="winner-row" id="winnerOverall">
+            <button class="winner-btn" data-set="Overall" data-val="A" onclick="selectWinner(this)">🥇 Model A</button>
+            <button class="winner-btn" data-set="Overall" data-val="B" onclick="selectWinner(this)">🥇 Model B</button>
+            <button class="winner-btn" data-set="Overall" data-val="C" onclick="selectWinner(this)">🥇 Model C</button>
+          </div>
+          <span class="field-error" id="err-winnerOverall">Please select an overall preference.</span>
+        </div>
+        <div class="qual-question">
+          <div class="ql">Q8. Specific Feedback <span class="required">*</span><br/><span>"In 1–2 sentences, what was the biggest mistake made by the worst-performing image?"</span></div>
+          <div class="form-group">
+            <textarea id="worstFeedback" rows="3" placeholder="Describe the biggest flaw you noticed…"></textarea>
+            <span class="field-error" id="err-worstFeedback">Please provide at least one sentence of feedback.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit -->
+    <div class="submit-zone">
+      <p>🙏 Thank you for evaluating these AI-generated images. Your ratings help measure model performance for Indian festive advertising.</p>
+      <button class="btn-submit" id="submitBtn" onclick="submitForm()">Submit Evaluation →</button>
+      <div class="submit-status" id="submitStatus"></div>
+    </div>
+
+  </div><!-- /container -->
+</div><!-- /page-form -->
+
+<!-- ════════════════════════════════════════
+     PAGE 2 — ANALYTICS (password-gated)
+════════════════════════════════════════ -->
+<div class="page" id="page-analytics">
+
+  <!-- Password gate -->
+  <div id="passGate" class="pass-gate">
+    <div style="font-size:2rem;margin-bottom:.5rem">🔐</div>
+    <h2>Analytics Access</h2>
+    <p>This section is restricted to the evaluation owner. Enter the password to continue.</p>
+    <input type="password" id="passInput" placeholder="••••••••" onkeydown="if(event.key==='Enter')checkPass()" />
+    <button class="btn-unlock" onclick="checkPass()">Unlock Analytics</button>
+    <div class="err" id="passErr">Incorrect password. Please try again.</div>
+  </div>
+
+  <!-- Analytics dashboard (hidden until unlocked) -->
+  <div id="analyticsDash" style="display:none">
+    <div class="analytics-wrap">
+      <div class="an-hero">
+        <h2>📊 Evaluation Analytics Dashboard</h2>
+        <p>Aggregated results across all participant submissions — fetched live from Google Sheets</p>
+        <div class="an-meta">
+          <span id="an-count">0 submissions</span>
+          <span id="an-updated">—</span>
+        </div>
+      </div>
+
+      <button class="btn-refresh" onclick="loadAnalytics()">🔄 Refresh Data</button>
+
+      <div id="an-loading" style="text-align:center;padding:3rem;color:var(--muted)">
+        <span style="font-size:2rem;display:block;margin-bottom:.7rem">⏳</span>
+        Loading data from Google Sheets…
+      </div>
+
+      <div id="an-content" style="display:none">
+
+        <!-- Row 1: Combined ranking + winner tallies -->
+        <div class="an-grid">
+
+          <div class="an-card" style="grid-column:span 1">
+            <h3>🏆 Final Ranking — Combined Score</h3>
+            <div class="podium" id="an-podium"></div>
+          </div>
+
+          <div class="an-card">
+            <h3>🎯 Overall Preference Votes</h3>
+            <div id="an-tally-overall"></div>
+          </div>
+
+        </div>
+
+        <!-- Row 2: Set A scores -->
+        <div class="an-grid">
+          <div class="an-card">
+            <h3>🍬 Set A — Avg Scores per Criterion</h3>
+            <div id="an-setA-scores"></div>
+          </div>
+          <div class="an-card">
+            <h3>🍬 Set A — Winner Votes</h3>
+            <div id="an-tally-A"></div>
+          </div>
+        </div>
+
+        <!-- Row 3: Set B scores -->
+        <div class="an-grid">
+          <div class="an-card">
+            <h3>👫 Set B — Avg Scores per Criterion</h3>
+            <div id="an-setB-scores"></div>
+          </div>
+          <div class="an-card">
+            <h3>👫 Set B — Winner Votes</h3>
+            <div id="an-tally-B"></div>
+          </div>
+        </div>
+
+        <!-- Row 4: Defects -->
+        <div class="an-grid">
+          <div class="an-card">
+            <h3>🔍 Set A — Defect Frequency</h3>
+            <div id="an-defects-A"></div>
+          </div>
+          <div class="an-card">
+            <h3>🔍 Set B — Defect Frequency</h3>
+            <div id="an-defects-B"></div>
+          </div>
+        </div>
+
+        <!-- Row 5: Feedback log -->
+        <div class="an-card" style="margin-bottom:1.5rem">
+          <h3>💬 Qualitative Feedback Log</h3>
+          <ul class="fb-list" id="an-feedback"></ul>
+        </div>
+
+      </div><!-- /an-content -->
+    </div>
+  </div>
+
+</div><!-- /page-analytics -->
+
+<!-- ── RESULTS MODAL ── -->
+<div class="overlay" id="resultsOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>🪔 Evaluation Submitted!</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- ── LIGHTBOX ── -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightboxImg" src="" alt="Enlarged view" />
+</div>
+
+<!-- ── TOAST ── -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ════════════════════════════════════════════════════════
+  // CONFIG — set both values after deploying Apps Script
+  // ════════════════════════════════════════════════════════
+  const APPS_SCRIPT_URL  = "https://script.google.com/macros/s/AKfycbw4C5SVj8KweClBiV2f0QUZZOk1gTHG80YU6FuZJt-8weNwLZY88Dcbowg_jAsX8mdQ/exechttps://script.google.com/macros/s/AKfycbw4C5SVj8KweClBiV2f0QUZZOk1gTHG80YU6FuZJt-8weNwLZY88Dcbowg_jAsX8mdQ/exechttps://script.google.com/macros/s/AKfycbxtbbEPDWTINL3IqCZaPtIsRgy4SNx0fBTd06oyJz7fJ3KHtV9TcdHeJv8TW-bkJgYu/exec";
+  const ANALYTICS_PASS   = "diwali2024";   // ← change this to your own password
+
+  // ════════════════════════════════════════════════════════
+  // TAB SWITCHING
+  // ════════════════════════════════════════════════════════
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    document.getElementById('page-' + tab).classList.add('active');
+  }
+
+  // ════════════════════════════════════════════════════════
+  // ANALYTICS PASSWORD GATE
+  // ════════════════════════════════════════════════════════
+  function checkPass() {
+    const val = document.getElementById('passInput').value;
+    if (val === ANALYTICS_PASS) {
+      document.getElementById('passGate').style.display = 'none';
+      document.getElementById('analyticsDash').style.display = 'block';
+      loadAnalytics();
+    } else {
+      document.getElementById('passErr').classList.add('show');
+      document.getElementById('passInput').value = '';
+    }
+  }
+
+  // ════════════════════════════════════════════════════════
+  // ANALYTICS DATA FETCH & RENDER
+  // ════════════════════════════════════════════════════════
+  async function loadAnalytics() {
+    if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+      document.getElementById('an-loading').innerHTML =
+        '<span style="font-size:2rem;display:block;margin-bottom:.7rem">⚠️</span>Apps Script URL not configured yet. Add it to the APPS_SCRIPT_URL constant in the script.';
+      document.getElementById('an-loading').style.display = 'block';
+      return;
+    }
+
+    document.getElementById('an-loading').style.display = 'block';
+    document.getElementById('an-content').style.display  = 'none';
+
+    try {
+      const res  = await fetch(APPS_SCRIPT_URL + '?action=getAll');
+      const json = await res.json();
+
+      if (json.status !== 'ok' || !json.rows) throw new Error(json.message || 'Bad response');
+
+      document.getElementById('an-loading').style.display = 'none';
+      document.getElementById('an-content').style.display = 'block';
+
+      renderAnalytics(json.rows);
+
+    } catch(err) {
+      document.getElementById('an-loading').innerHTML =
+        `<span style="font-size:2rem;display:block;margin-bottom:.7rem">❌</span>Could not load data: ${err.message}`;
+    }
+  }
+
+  function renderAnalytics(rows) {
+    const n = rows.length;
+    document.getElementById('an-count').textContent   = n + ' submission' + (n !== 1 ? 's' : '');
+    document.getElementById('an-updated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+
+    if (n === 0) {
+      document.getElementById('an-content').innerHTML =
+        '<div class="no-data"><span class="nd-icon">📭</span>No submissions yet.</div>';
+      return;
+    }
+
+    const M = ['A','B','C'];
+    const NAMES = { A:'GPT Image 1', B:'Gemini 2.5 Flash', C:'Gemini 3.1 Flash' };
+
+    // ── helpers ──
+    function col(rows, key) {
+      return rows.map(r => parseFloat(r[key])).filter(v => !isNaN(v) && v > 0);
+    }
+    function avg(arr) { return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0; }
+    function pct(v,t) { return t ? ((v/t)*100).toFixed(1) : '0'; }
+    function countWin(rows, key, val) { return rows.filter(r => r[key] === val).length; }
+
+    function barRow(model, label, score, max=5) {
+      const w = (score/max*100).toFixed(1);
+      return `<div class="bar-row">
+        <div class="bar-row-top"><span class="mn">${label}</span><span class="sv">${score.toFixed(2)} / 5</span></div>
+        <div class="bar-bg"><div class="bar-fill bf-${model}" style="width:${w}%"></div></div>
+      </div>`;
+    }
+
+    function tallyRow(model, label, votes, total, cls) {
+      const w = total ? Math.max((votes/total*100),2).toFixed(1) : '0';
+      return `<div class="tally-row">
+        <span class="tally-label">${label}</span>
+        <div class="tally-bar-bg"><div class="tally-fill ${cls}" style="width:${w}%">${votes>0?votes:''}</div></div>
+        <span class="tally-count">${votes} <span style="font-weight:400">(${pct(votes,total)}%)</span></span>
+      </div>`;
+    }
+
+    // ── combined averages ──
+    const combAvg = {};
+    M.forEach(m => { combAvg[m] = avg(col(rows, 'Combined_Avg_Model'+m)); });
+
+    // podium — sort by combined avg
+    const ranked = [...M].sort((a,b) => combAvg[b] - combAvg[a]);
+    const podIcons = ['🥇','🥈','🥉'];
+    const podClass = ['p1','p2','p3'];
+    document.getElementById('an-podium').innerHTML = ranked.map((m,i) =>
+      `<div class="podium-item ${podClass[i]}">
+        <div class="podium-icon">${podIcons[i]}</div>
+        <div class="podium-name">${NAMES[m]}</div>
+        <div class="podium-score">${combAvg[m].toFixed(2)}</div>
+        <div class="podium-sub">/ 5.00 combined</div>
+      </div>`
+    ).join('');
+
+    // ── overall tally ──
+    document.getElementById('an-tally-overall').innerHTML =
+      M.map(m => tallyRow(m, NAMES[m], countWin(rows,'Overall_Winner',m), n, 'tf-'+m)).join('');
+
+    // ── Set A scores ──
+    document.getElementById('an-setA-scores').innerHTML =
+      M.map(m => `<strong style="font-size:.8rem;display:block;margin:.6rem 0 .3rem">${NAMES[m]}</strong>` +
+        barRow(m, 'Cultural Auth.', avg(col(rows,'SetA_Model'+m+'_Cultural'))) +
+        barRow(m, 'Product Realism', avg(col(rows,'SetA_Model'+m+'_Realism'))) +
+        barRow(m, 'Prompt Adherence', avg(col(rows,'SetA_Model'+m+'_Prompt')))
+      ).join('<hr style="margin:.8rem 0;border:none;border-top:1px solid var(--border)">');
+
+    document.getElementById('an-tally-A').innerHTML =
+      [...M,'Tie'].map(m => tallyRow(
+        m, m==='Tie'?'Tie/None':NAMES[m],
+        countWin(rows,'SetA_Winner',m), n, 'tf-'+m
+      )).join('');
+
+    // ── Set B scores ──
+    document.getElementById('an-setB-scores').innerHTML =
+      M.map(m => `<strong style="font-size:.8rem;display:block;margin:.6rem 0 .3rem">${NAMES[m]}</strong>` +
+        barRow(m, 'Cultural Auth.', avg(col(rows,'SetB_Model'+m+'_Cultural'))) +
+        barRow(m, 'Anat. Realism', avg(col(rows,'SetB_Model'+m+'_Anat'))) +
+        barRow(m, 'Prompt Adherence', avg(col(rows,'SetB_Model'+m+'_Prompt')))
+      ).join('<hr style="margin:.8rem 0;border:none;border-top:1px solid var(--border)">');
+
+    document.getElementById('an-tally-B').innerHTML =
+      [...M,'Tie'].map(m => tallyRow(
+        m, m==='Tie'?'Tie/None':NAMES[m],
+        countWin(rows,'SetB_Winner',m), n, 'tf-'+m
+      )).join('');
+
+    // ── Defects ──
+    function defectTable(rows, prefix) {
+      const defectKeys = {
+        A: ['vark-grey','plastic','thali-distort','lighting','missing'],
+        B: ['hands','saree','exaggerated','face-light','bg-blur']
+      };
+      const set = prefix === 'SetA' ? 'A' : 'B';
+      const keys = defectKeys[set];
+      const labels = set === 'A'
+        ? ['Silver foil (vark) unrealistic','Plasticky texture','Brass thali distorted','Unnatural lighting','Missing prompt items']
+        : ['Distorted hands/face','Saree drape wrong','Overly orientalized','Unnatural face lighting','BG blurred/unrealistic'];
+
+      const counts = { A:{}, B:{}, C:{} };
+      M.forEach(m => {
+        keys.forEach(k => { counts[m][k] = 0; });
+        rows.forEach(r => {
+          const cell = r[prefix+'_Model'+m+'_Defects'] || '';
+          cell.split(' | ').forEach(v => { v=v.trim(); if(counts[m][v]!==undefined) counts[m][v]++; });
+        });
+      });
+
+      return `<table class="def-table">
+        <thead><tr><th>Defect</th><th>Mdl A</th><th>Mdl B</th><th>Mdl C</th></tr></thead>
+        <tbody>${keys.map((k,i) => `<tr>
+          <td>${labels[i]}</td>
+          ${M.map(m => `<td><span class="dc${counts[m][k]===0?' z':''}">${counts[m][k]}</span></td>`).join('')}
+        </tr>`).join('')}</tbody>
+      </table>`;
+    }
+
+    document.getElementById('an-defects-A').innerHTML = defectTable(rows, 'SetA');
+    document.getElementById('an-defects-B').innerHTML = defectTable(rows, 'SetB');
+
+    // ── Feedback log ──
+    document.getElementById('an-feedback').innerHTML = rows.map((r,i) =>
+      `<li>
+        <div class="fb-meta">#${i+1} · ${r.Name||'Anonymous'} · Overall pick: <strong>${NAMES[r.Overall_Winner]||r.Overall_Winner||'—'}</strong> · ${r.Timestamp ? new Date(r.Timestamp).toLocaleDateString() : ''}</div>
+        "${r.Overall_Feedback || '—'}"
+      </li>`
+    ).join('');
+  }
+
+  // ════════════════════════════════════════════════════════
+  // FORM — STAR RATINGS
+  // ════════════════════════════════════════════════════════
+  const winners = {};
+
+  document.querySelectorAll('.defect-item input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', function() {
+      this.closest('.defect-item').classList.toggle('checked', this.checked);
+      updateProgress();
+    });
+  });
+
+  function setStar(starEl, val) {
+    const c = starEl.closest('.stars');
+    c.dataset.val = val;
+    renderStars(c, val);
+    hideError('starsA'); hideError('starsB');
+    updateProgress();
+  }
+  function hoverStar(starEl, val) { renderStarsHover(starEl.closest('.stars'), val); }
+  function clearHover(c) { renderStars(c, parseInt(c.dataset.val)||0); }
+  function renderStars(c, val) { c.querySelectorAll('.star').forEach((s,i) => { s.classList.toggle('active', i<val); s.classList.remove('hovered'); }); }
+  function renderStarsHover(c, val) { c.querySelectorAll('.star').forEach((s,i) => s.classList.toggle('hovered', i<val)); }
+
+  function selectWinner(btn) {
+    const set=btn.dataset.set, val=btn.dataset.val;
+    winners[set]=val;
+    btn.closest('.winner-row').querySelectorAll('.winner-btn').forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected');
+    hideError('winner'+set);
+    updateProgress();
+  }
+
+  function showError(id) { const e=document.getElementById('err-'+id); if(e) e.classList.add('show'); }
+  function hideError(id) { const e=document.getElementById('err-'+id); if(e) e.classList.remove('show'); }
+  function markField(id,err) { const e=document.getElementById(id); if(e) e.classList.toggle('error',err); }
+
+  function updateProgress() {
+    let f=0; const t=10;
+    if(document.getElementById('fullName').value.trim()) f++;
+    if(document.getElementById('email').value.trim()) f++;
+    if(document.getElementById('age').value && parseInt(document.getElementById('age').value)>=18) f++;
+    if(document.getElementById('consent').checked) f++;
+    if(winners['A']) f++; if(winners['B']) f++; if(winners['Overall']) f++;
+    const gA=['sA-cultural-A','sA-cultural-B','sA-cultural-C','sA-realism-A','sA-realism-B','sA-realism-C','sA-prompt-A','sA-prompt-B','sA-prompt-C'];
+    if(gA.every(g=>parseInt(document.getElementById(g)?.dataset.val||0)>0)) f++;
+    const gB=['sB-cultural-A','sB-cultural-B','sB-cultural-C','sB-anat-A','sB-anat-B','sB-anat-C','sB-prompt-A','sB-prompt-B','sB-prompt-C'];
+    if(gB.every(g=>parseInt(document.getElementById(g)?.dataset.val||0)>0)) f++;
+    if(document.getElementById('worstFeedback').value.trim().length>10) f++;
+    const p=Math.round((f/t)*100);
+    document.getElementById('progressFill').style.width=p+'%';
+    document.getElementById('progressPct').textContent=p+'%';
+  }
+  ['fullName','email','age','worstFeedback'].forEach(id=>document.getElementById(id).addEventListener('input',updateProgress));
+  document.getElementById('consent').addEventListener('change',updateProgress);
+
+  function validate() {
+    let ok=true;
+    const name=document.getElementById('fullName').value.trim();
+    if(!name){showError('fullName');markField('fullName',true);ok=false;}else{hideError('fullName');markField('fullName',false);}
+    const email=document.getElementById('email').value.trim();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showError('email');markField('email',true);ok=false;}else{hideError('email');markField('email',false);}
+    const age=parseInt(document.getElementById('age').value);
+    if(!age||age<18){showError('age');markField('age',true);ok=false;}else{hideError('age');markField('age',false);}
+    if(!document.getElementById('consent').checked){showError('consent');ok=false;}else hideError('consent');
+    if(!winners['A']){showError('winnerA');ok=false;}
+    if(!winners['B']){showError('winnerB');ok=false;}
+    if(!winners['Overall']){showError('winnerOverall');ok=false;}
+    const gA=['sA-cultural-A','sA-cultural-B','sA-cultural-C','sA-realism-A','sA-realism-B','sA-realism-C','sA-prompt-A','sA-prompt-B','sA-prompt-C'];
+    if(!gA.every(g=>parseInt(document.getElementById(g)?.dataset.val||0)>0)){showError('starsA');ok=false;}else hideError('starsA');
+    const gB=['sB-cultural-A','sB-cultural-B','sB-cultural-C','sB-anat-A','sB-anat-B','sB-anat-C','sB-prompt-A','sB-prompt-B','sB-prompt-C'];
+    if(!gB.every(g=>parseInt(document.getElementById(g)?.dataset.val||0)>0)){showError('starsB');ok=false;}else hideError('starsB');
+    const fb=document.getElementById('worstFeedback').value.trim();
+    if(fb.length<10){showError('worstFeedback');markField('worstFeedback',true);ok=false;}else{hideError('worstFeedback');markField('worstFeedback',false);}
+    return ok;
+  }
+
+  function getStars(id){ return parseInt(document.getElementById(id)?.dataset.val||0); }
+  function starsHtml(n){ return '★'.repeat(n)+'☆'.repeat(5-n); }
+  function getDefects(name){ return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(c=>c.parentElement.textContent.trim()); }
+  function avgScore(arr){ return (arr.reduce((a,b)=>a+b,0)/arr.length).toFixed(2); }
+  function modelLabel(v){ return {A:'Model A (GPT Image 1)',B:'Model B (Gemini 2.5 Flash)',C:'Model C (Gemini 3.1 Flash)',Tie:'Tie / None'}[v]||v; }
+
+  // ════════════════════════════════════════════════════════
+  // SUBMIT
+  // ════════════════════════════════════════════════════════
+  async function submitForm() {
+    if(!validate()){
+      showToast('⚠️ Please complete all required fields.','error');
+      const e=document.querySelector('.field-error.show');
+      if(e) e.scrollIntoView({behavior:'smooth',block:'center'});
+      return;
+    }
+
+    if(!APPS_SCRIPT_URL||APPS_SCRIPT_URL==='YOUR_APPS_SCRIPT_URL_HERE'){
+      const data=collectData();
+      buildModal(data);
+      document.getElementById('resultsOverlay').classList.add('open');
+      showToast('⚠️ No Apps Script URL set — not saved to Sheets.','error');
+      return;
+    }
+
+    const btn=document.getElementById('submitBtn');
+    const status=document.getElementById('submitStatus');
+    btn.disabled=true;
+    btn.innerHTML='<span class="spinner"></span>Saving to Google Sheets…';
+    status.className='submit-status sending';
+    status.textContent='⏳ Submitting your evaluation…';
+
+    const data=collectData();
+    try {
+      await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(data)});
+      status.className='submit-status ok';
+      status.textContent='✅ Saved to Google Sheets!';
+      btn.innerHTML='✅ Submitted';
+      showToast('✅ Evaluation saved to Google Sheets!','success');
+      setTimeout(()=>{ buildModal(data); document.getElementById('resultsOverlay').classList.add('open'); },1000);
+    } catch(err) {
+      status.className='submit-status fail';
+      status.textContent='❌ Network error — could not reach Google Sheets.';
+      btn.disabled=false;
+      btn.innerHTML='Retry Submission →';
+      showToast('❌ Network error.','error');
+      buildModal(data);
+      document.getElementById('resultsOverlay').classList.add('open');
+    }
+    updateProgress();
+  }
+
+  function collectData(){
+    return {
+      participant:{ name:document.getElementById('fullName').value.trim(), email:document.getElementById('email').value.trim(), age:document.getElementById('age').value },
+      setA:{ winner:winners['A'],
+        scores:{ A:{cultural:getStars('sA-cultural-A'),realism:getStars('sA-realism-A'),prompt:getStars('sA-prompt-A')}, B:{cultural:getStars('sA-cultural-B'),realism:getStars('sA-realism-B'),prompt:getStars('sA-prompt-B')}, C:{cultural:getStars('sA-cultural-C'),realism:getStars('sA-realism-C'),prompt:getStars('sA-prompt-C')} },
+        defects:{ A:getDefects('dA-A'), B:getDefects('dA-B'), C:getDefects('dA-C') }
+      },
+      setB:{ winner:winners['B'],
+        scores:{ A:{cultural:getStars('sB-cultural-A'),anat:getStars('sB-anat-A'),prompt:getStars('sB-prompt-A')}, B:{cultural:getStars('sB-cultural-B'),anat:getStars('sB-anat-B'),prompt:getStars('sB-prompt-B')}, C:{cultural:getStars('sB-cultural-C'),anat:getStars('sB-anat-C'),prompt:getStars('sB-prompt-C')} },
+        defects:{ A:getDefects('dB-A'), B:getDefects('dB-B'), C:getDefects('dB-C') }
+      },
+      overall:{ winner:winners['Overall'], feedback:document.getElementById('worstFeedback').value.trim() }
+    };
+  }
+
+  // ════════════════════════════════════════════════════════
+  // RESULTS MODAL (no download button)
+  // ════════════════════════════════════════════════════════
+  function buildModal(d) {
+    const avgA = {}, avgB = {}, totals = {};
+    ['A','B','C'].forEach(m => {
+      avgA[m] = avgScore([d.setA.scores[m].cultural, d.setA.scores[m].realism, d.setA.scores[m].prompt]);
+      avgB[m] = avgScore([d.setB.scores[m].cultural, d.setB.scores[m].anat,    d.setB.scores[m].prompt]);
+      totals[m] = ((parseFloat(avgA[m])+parseFloat(avgB[m]))/2).toFixed(2);
+    });
+
+    function bar(val,max=5){ const p=(val/max*100).toFixed(0); return `<div class="score-bar-bg"><div class="score-bar-fill" style="width:${p}%"></div></div>`; }
+    function def(arr){ return arr.length ? arr.map(d=>`<span style="background:#fdf0f0;border:1px solid #e74c3c;border-radius:4px;padding:.1rem .45rem;font-size:.76rem;margin:.1rem .15rem;display:inline-block">${d}</span>`).join('') : '<em style="color:#aaa">None flagged</em>'; }
+
+    document.getElementById('modalBody').innerHTML = `
+      <div class="result-section">
+        <h3>👤 Participant</h3>
+        <div class="result-row"><span class="label">Name</span><span class="value">${d.participant.name}</span></div>
+        <div class="result-row"><span class="label">Email</span><span class="value">${d.participant.email}</span></div>
+        <div class="result-row"><span class="label">Age</span><span class="value">${d.participant.age}</span></div>
+      </div>
+      <div class="result-section">
+        <h3>🍬 Set A — Your Scores</h3>
+        ${['A','B','C'].map(m=>`<div style="margin-bottom:.8rem"><strong style="font-size:.85rem">Model ${m}</strong>
+          <div class="score-bar-label" style="margin-top:.4rem"><span>Cultural Auth.</span><span class="stars-display">${starsHtml(d.setA.scores[m].cultural)} ${d.setA.scores[m].cultural}/5</span></div>${bar(d.setA.scores[m].cultural)}
+          <div class="score-bar-label" style="margin-top:.3rem"><span>Product Realism</span><span class="stars-display">${starsHtml(d.setA.scores[m].realism)} ${d.setA.scores[m].realism}/5</span></div>${bar(d.setA.scores[m].realism)}
+          <div class="score-bar-label" style="margin-top:.3rem"><span>Prompt Adherence</span><span class="stars-display">${starsHtml(d.setA.scores[m].prompt)} ${d.setA.scores[m].prompt}/5</span></div>${bar(d.setA.scores[m].prompt)}
+          <div style="font-size:.8rem;color:#666;margin-top:.3rem">Set A Avg: <strong>${avgA[m]}/5</strong> &nbsp;·&nbsp; Defects: ${def(d.setA.defects[m])}</div>
+        </div>`).join('')}
+        <div class="result-row"><span class="label">Set A Winner</span><span class="value">${modelLabel(d.setA.winner)}</span></div>
+      </div>
+      <div class="result-section">
+        <h3>👫 Set B — Your Scores</h3>
+        ${['A','B','C'].map(m=>`<div style="margin-bottom:.8rem"><strong style="font-size:.85rem">Model ${m}</strong>
+          <div class="score-bar-label" style="margin-top:.4rem"><span>Cultural Auth.</span><span class="stars-display">${starsHtml(d.setB.scores[m].cultural)} ${d.setB.scores[m].cultural}/5</span></div>${bar(d.setB.scores[m].cultural)}
+          <div class="score-bar-label" style="margin-top:.3rem"><span>Anat. Realism</span><span class="stars-display">${starsHtml(d.setB.scores[m].anat)} ${d.setB.scores[m].anat}/5</span></div>${bar(d.setB.scores[m].anat)}
+          <div class="score-bar-label" style="margin-top:.3rem"><span>Prompt Adherence</span><span class="stars-display">${starsHtml(d.setB.scores[m].prompt)} ${d.setB.scores[m].prompt}/5</span></div>${bar(d.setB.scores[m].prompt)}
+          <div style="font-size:.8rem;color:#666;margin-top:.3rem">Set B Avg: <strong>${avgB[m]}/5</strong> &nbsp;·&nbsp; Defects: ${def(d.setB.defects[m])}</div>
+        </div>`).join('')}
+        <div class="result-row"><span class="label">Set B Winner</span><span class="value">${modelLabel(d.setB.winner)}</span></div>
+      </div>
+      <div class="result-section">
+        <h3>📊 Your Combined Scores</h3>
+        ${['A','B','C'].map(m=>`<div class="score-bar-label" style="margin-top:.5rem"><span>Model ${m}</span><span><strong>${totals[m]} / 5.00</strong></span></div>${bar(parseFloat(totals[m]))}`).join('')}
+      </div>
+      <div class="result-section">
+        <h3>🏆 Your Overall Pick</h3>
+        <div class="winner-highlight"><div class="trophy">🥇</div><div class="wname">${modelLabel(d.overall.winner)}</div><div style="font-size:.85rem;color:#666">Selected as most commercially usable</div></div>
+      </div>
+      <div class="result-section">
+        <h3>💬 Your Feedback</h3>
+        <div style="background:#f8f8f8;border-radius:8px;padding:.8rem 1rem;font-size:.88rem;line-height:1.6">"${d.overall.feedback}"</div>
+      </div>`;
+  }
+
+  function closeModal(){ document.getElementById('resultsOverlay').classList.remove('open'); }
+  document.getElementById('resultsOverlay').addEventListener('click',function(e){ if(e.target===this) closeModal(); });
+
+  // ════════════════════════════════════════════════════════
+  // LIGHTBOX & TOAST
+  // ════════════════════════════════════════════════════════
+  function openLightbox(src){ document.getElementById('lightboxImg').src=src; document.getElementById('lightbox').classList.add('open'); }
+  function closeLightbox(){ document.getElementById('lightbox').classList.remove('open'); }
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeLightbox(); closeModal(); } });
+
+  function showToast(msg,type=''){
+    const t=document.getElementById('toast');
+    t.textContent=msg; t.className='toast '+(type||''); t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),3500);
+  }
+
+  updateProgress();
+</script>
+</body>
+</html>
