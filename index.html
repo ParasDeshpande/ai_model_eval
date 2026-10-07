@@ -134,90 +134,6 @@
     .star:hover,.star.hovered,.star.active { color:#f9c74f; }
     .star:hover { transform:scale(1.2); }
 
-    /* ── Table scroll wrapper on mobile ── */
-    .table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; margin-bottom:1.5rem; }
-    .table-scroll .ratings-table { margin-bottom:0; min-width:480px; }
-    .table-scroll-hint { display:none; font-size:.75rem; color:var(--muted); text-align:right; margin-bottom:.4rem; }
-
-    /* ════════════════════════════════════════
-       RESPONSIVE — mobile breakpoints
-    ════════════════════════════════════════ */
-    @media (max-width: 768px) {
-      /* Header */
-      .site-header { padding:1.5rem 1rem 1.2rem; }
-      .site-header::before, .site-header::after { display:none; }
-      .site-header h1 { font-size:1.2rem; }
-      .site-header p { font-size:.83rem; }
-      .header-badge { font-size:.72rem; padding:.25rem .75rem; }
-
-      /* Tab nav */
-      .tab-btn { padding:.75rem 1.1rem; font-size:.83rem; gap:.3rem; flex:1; justify-content:center; }
-
-      /* Progress */
-      .progress-wrap { padding:.7rem 1rem; gap:.5rem; }
-      .progress-label { display:none; }
-
-      /* Container */
-      .container { padding:.9rem .75rem 3rem; gap:1.4rem; }
-
-      /* Cards */
-      .card-header { padding:.9rem 1rem; flex-wrap:wrap; gap:.4rem; }
-      .card-header h2 { font-size:.92rem; }
-      .card-header .step-badge { display:none; }
-      .card-body { padding:1rem; }
-
-      /* Form */
-      .form-row { grid-template-columns:1fr; }
-      /* Prevent iOS zoom on input focus */
-      .form-group input,
-      .form-group textarea,
-      .form-group select { font-size:1rem; }
-
-      /* Images — single column */
-      .model-grid { grid-template-columns:1fr; gap:.75rem; }
-
-      /* Ratings table — horizontal scroll */
-      .table-scroll-hint { display:block; }
-      .star { font-size:1.6rem; }
-
-      /* Winner buttons — 2 per row */
-      .winner-btn { flex:1; min-width:calc(50% - .35rem); text-align:center; font-size:.83rem; padding:.6rem .4rem; }
-
-      /* Defects — single column */
-      .defect-grid { grid-template-columns:1fr; }
-      .defect-item { font-size:.83rem; padding:.55rem .7rem; }
-
-      /* Submit */
-      .btn-submit { width:100%; padding:.9rem 1rem; font-size:.95rem; }
-
-      /* Modal — bottom sheet style */
-      .overlay { padding:0; align-items:flex-end; }
-      .modal { border-radius:var(--radius) var(--radius) 0 0; max-height:92vh; }
-      .modal-header { padding:1.1rem 1.2rem; border-radius:var(--radius) var(--radius) 0 0; }
-      .modal-header h2 { font-size:1.05rem; }
-      .modal-body { padding:1.1rem; }
-      .score-bar-label { font-size:.78rem; }
-
-      /* Analytics */
-      .analytics-wrap { padding:.9rem .75rem 3rem; }
-      .an-hero { padding:1.4rem 1rem; }
-      .an-hero h2 { font-size:1.1rem; }
-      .an-grid { grid-template-columns:1fr; }
-      .an-card { padding:1rem; }
-      .pass-gate { margin:2rem .75rem; padding:1.8rem 1.2rem; }
-
-      /* Consent */
-      .consent-box label { font-size:.82rem; }
-    }
-
-    @media (max-width: 400px) {
-      .site-header h1 { font-size:1.05rem; }
-      .tab-btn { font-size:.76rem; padding:.7rem .7rem; }
-      .card-header h2 { font-size:.85rem; }
-      .winner-btn { font-size:.78rem; }
-      .star { font-size:1.5rem; }
-    }
-
     /* ── Defects ── */
     .defect-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:.6rem; margin-bottom:1.5rem; }
     .defect-item { display:flex; align-items:flex-start; gap:.5rem; font-size:.85rem; padding:.5rem .7rem; border:1.5px solid var(--border); border-radius:8px; cursor:pointer; transition:background .2s,border-color .2s; }
@@ -453,9 +369,8 @@
         <div class="divider"></div>
 
         <div class="section-title"><span>⭐</span> Multi-Criteria Rating (1–5 Stars) <span class="pill">Q2</span></div>
-        <div class="table-scroll-hint">← scroll to rate all models →</div>
-        <div class="table-scroll">
         <table class="ratings-table">
+          <thead><tr><th>Criterion</th><th>Model A</th><th>Model B</th><th>Model C</th></tr></thead>
           <tbody>
             <tr>
               <td><strong>Cultural Authenticity &amp; Traditional Aesthetics</strong><div class="q-text">How authentic is the presentation of the brass thali, clay diyas, and marigold petals for an Indian home context?</div></td>
@@ -477,7 +392,6 @@
             </tr>
           </tbody>
         </table>
-        </div><!-- /table-scroll Set A -->
         <span class="field-error" id="err-starsA">Please rate all criteria for Set A.</span>
         <div class="divider"></div>
 
@@ -540,9 +454,8 @@
         <div class="divider"></div>
 
         <div class="section-title"><span>⭐</span> Multi-Criteria Rating (1–5 Stars) <span class="pill">Q5</span></div>
-        <div class="table-scroll-hint">← scroll to rate all models →</div>
-        <div class="table-scroll">
         <table class="ratings-table">
+          <thead><tr><th>Criterion</th><th>Model A</th><th>Model B</th><th>Model C</th></tr></thead>
           <tbody>
             <tr>
               <td><strong>Cultural Authenticity &amp; Festive Vibe</strong><div class="q-text">Do the Banarasi silk saree (zari border), festive Kurta Pyjama, rangoli, and balcony backdrop accurately represent a real Indian Diwali night?</div></td>
@@ -564,7 +477,6 @@
             </tr>
           </tbody>
         </table>
-        </div><!-- /table-scroll Set B -->
         <span class="field-error" id="err-starsB">Please rate all criteria for Set B.</span>
         <div class="divider"></div>
 
